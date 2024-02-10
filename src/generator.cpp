@@ -58,7 +58,13 @@ void Generator::generate_md() {
     file_stream << m_map.at(Parser::SUBJECT) << "\n\n";
     file_stream << "---\n\n";
     file_stream << "#### " << m_map.at(Parser::SUBJECT).substr(9) << "\n\n";
-    file_stream << m_map.at(Parser::CONTENT_PLAIN) << '\n';
+    std::string content {m_map.at(Parser::CONTENT_PLAIN)};
+    for (size_t i{0}; i < content.size(); i++) {
+        if (content.at(i) == '\n') {
+            content.replace(i++, 1, "\n\n");
+        }
+    }
+    file_stream << content << '\n';
 }
 
 std::string Generator::format_filename(const std::string& file_ext) {
