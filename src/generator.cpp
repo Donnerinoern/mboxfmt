@@ -19,7 +19,7 @@ void Generator::generate(Mode mode) {
             generate_html();
             break;
         case MD:
-            std::cout << "Not yet implemented...";
+            generate_md();
             break;
     }
 }
@@ -46,6 +46,19 @@ void Generator::generate_html()  {
     file_stream << tag << m_map.at(Parser::SUBJECT) << close_tag;
     file_stream << m_map.at(Parser::CONTENT_HTML) << '\n';
     file_stream.close();
+}
+
+void Generator::generate_md() {
+    std::string filename {format_filename(".md")};
+    std::fstream file_stream {filename, std::ios::out};
+    file_stream << "### Header\n\n";
+    file_stream << m_map.at(Parser::FROM) << "\n\n";
+    file_stream << m_map.at(Parser::TO) << "\n\n";
+    file_stream << m_map.at(Parser::DATE) << "\n\n";
+    file_stream << m_map.at(Parser::SUBJECT) << "\n\n";
+    file_stream << "---\n\n";
+    file_stream << "#### " << m_map.at(Parser::SUBJECT).substr(9) << "\n\n";
+    file_stream << m_map.at(Parser::CONTENT_PLAIN) << '\n';
 }
 
 std::string Generator::format_filename(const std::string& file_ext) {

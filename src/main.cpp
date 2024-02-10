@@ -9,20 +9,23 @@
 #include "parser.h"
 #include "src/generator.h"
 
+void help() {
+    std::cout << "Usage: mboxtomd [arg [...]] filename\n\n";
+    std::cout << "Arguments:\n";
+    std::cout << "  --mode MODE        -m MODE\n\n";
+    std::cout << "Modes:\n";
+    std::cout << "  plain\n";
+    std::cout << "  html\n";
+    std::cout << "  md\n";
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cout << "Usage: mboxtomd [arg [...]] filename\n\n"; // TODO: Replace with usage:
-        std::cout << "Arguments:\n";
-        std::cout << "  --mode MODE        -m MODE\n\n";
-        std::cout << "Modes:\n";
-        std::cout << "  plain\n";
-        std::cout << "  html\n";
-        std::cout << "  md\n";
+        help();
         return 1;
     }
 
     std::string_view valid_args{"plain html md"};
-
     std::vector<std::string_view> args {argv + 1, argv + argc};
     std::string_view mode {};
     for (auto it {args.begin()}; it != args.end(); it++) {
