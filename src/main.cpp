@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 #include "parser.h"
-#include "src/generator.h"
+#include "generator.h"
 
 void help() {
     std::cout << "Usage: mboxtomd [arg [...]] filename\n\n";
@@ -54,8 +54,7 @@ int main(int argc, char* argv[]) {
     std::string_view input {string_stream.str()};
 
     Parser parser {input};
-    // parser.parse_file();
-    std::map<Parser::FieldType, std::string_view> map {parser.parse_file_map()};
+    std::map<Parser::FieldType, std::string_view> map {parser.parse_file()};
     Generator generator {map};
     Generator::Mode type {Generator::get_mode(mode)};
     generator.generate(type);
