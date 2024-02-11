@@ -77,7 +77,6 @@ int main(int argc, char* argv[]) {
     Parser parser {string_stream};
     std::map<Parser::FieldType, std::string> map {parser.parse_file()};
 
-    Generator generator {map, output_name};
-    Generator::Mode type {Generator::get_mode(mode)};
-    generator.generate_file(type);
+    Generator generator {map, output_name, Generator::modes.at(mode)};
+    generator.generate_file();
 }

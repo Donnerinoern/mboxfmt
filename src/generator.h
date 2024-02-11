@@ -15,9 +15,13 @@ class Generator {
             MD
         };
 
-        Generator(std::map<Parser::FieldType, std::string>, std::optional<std::string_view>);
-        void generate_file(Mode);
-        static Mode get_mode(std::string_view);
+        Generator(std::map<Parser::FieldType, std::string>, std::optional<std::string_view>, Mode);
+        void generate_file();
+        inline static const std::map<std::string_view, Mode> modes {
+            {"plain", PLAIN},
+            {"html", HTML},
+            {"md", MD}
+        };
 
     private:
         void generate_plain();
@@ -27,11 +31,7 @@ class Generator {
 
         std::map<Parser::FieldType, std::string> m_map;
         std::optional<std::string_view> m_output_name;
-        inline static const std::map<std::string_view, Mode> s_modes {
-            {"plain", PLAIN},
-            {"html", HTML},
-            {"md", MD}
-        };
+        Mode m_mode;
 };
 
 #endif

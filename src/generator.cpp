@@ -8,13 +8,14 @@
 #include <string_view>
 #include <iostream>
 
-Generator::Generator(std::map<Parser::FieldType, std::string> map, std::optional<std::string_view> output_name)
+Generator::Generator(std::map<Parser::FieldType, std::string> map, std::optional<std::string_view> output_name, Generator::Mode mode)
     : m_map {map}
     , m_output_name {output_name}
+    , m_mode {mode}
 {}
 
-void Generator::generate_file(Mode mode) {
-    switch (mode) {
+void Generator::generate_file() {
+    switch (m_mode) {
         case PLAIN:
             generate_plain();
             break;
@@ -86,8 +87,4 @@ std::string Generator::format_filename(const std::string& file_ext) {
     }
     filename = filename.substr(space_pos, filename.size()-space_pos)+file_ext;
     return filename;
-}
-
-Generator::Mode Generator::get_mode(const std::string_view mode) {
-    return s_modes.at(mode);
 }
