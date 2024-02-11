@@ -7,8 +7,8 @@
 #include <string>
 #include <string_view>
 #include <vector>
-#include "parser.h"
 #include "generator.h"
+#include "parser.h"
 
 bool file_valid(std::ifstream& file_stream) {
     if (!file_stream.good()) {
@@ -73,11 +73,11 @@ int main(int argc, char* argv[]) {
     std::stringstream string_stream;
     string_stream << file_stream.rdbuf();
     file_stream.close();
-    std::string_view input {string_stream.str()};
 
-    Parser parser {input};
-    std::map<Parser::FieldType, std::string_view> map {parser.parse_file()};
+    Parser parser {string_stream};
+    std::map<Parser::FieldType, std::string> map {parser.parse_file()};
+
     Generator generator {map, output_name};
     Generator::Mode type {Generator::get_mode(mode)};
-    generator.generate(type);
+    generator.generate_file(type);
 }

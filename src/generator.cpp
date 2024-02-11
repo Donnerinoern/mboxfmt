@@ -1,4 +1,5 @@
 #include "generator.h"
+#include "parser.h"
 #include <cstddef>
 #include <fstream>
 #include <map>
@@ -7,12 +8,12 @@
 #include <string_view>
 #include <iostream>
 
-Generator::Generator(std::map<Parser::FieldType, std::string_view> map, std::optional<std::string_view> output_name)
+Generator::Generator(std::map<Parser::FieldType, std::string> map, std::optional<std::string_view> output_name)
     : m_map {map}
     , m_output_name {output_name}
 {}
 
-void Generator::generate(Mode mode) {
+void Generator::generate_file(Mode mode) {
     switch (mode) {
         case PLAIN:
             generate_plain();

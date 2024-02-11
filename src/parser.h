@@ -1,5 +1,5 @@
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef NEW_PARSER_H
+#define NEW_PARSER_H
 
 #include <cstdint>
 #include <map>
@@ -11,20 +11,11 @@ class Parser {
         enum FieldType {
             FROM, TO, SUBJECT, DATE, CONTENT_PLAIN, CONTENT_HTML
         };
-        Parser(std::string_view input);
-        std::map<Parser::FieldType, std::string_view> parse_file();
+        Parser(std::stringstream&);
+        std::map<Parser::FieldType, std::string> parse_file();
 
     private:
-        uint8_t advance();
-        uint8_t peek();
-        std::string_view peek_two();
-        bool is_at_end();
-        std::optional<std::pair<Parser::FieldType, std::string_view>> extract_field(uint8_t c);
-        std::optional<std::pair<Parser::FieldType, std::string_view>> extract_content_field(uint8_t c);
-
-        std::string_view m_source;
-        size_t pos{0};
-        size_t peekPos{0};
+        std::stringstream& m_source;
         std::map<std::string_view, size_t> m_keywords {
             {"From:", FROM},
             {"To:", TO},

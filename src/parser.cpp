@@ -1,95 +1,66 @@
 #include "parser.h"
-#include <cstdint>
+#include <algorithm>
+#include <array>
+#include <cstddef>
 #include <iostream>
 #include <map>
 #include <optional>
+#include <sstream>
+#include <string>
 #include <string_view>
+#include <vector>
 
-Parser::Parser(std::string_view input)
+Parser::Parser(std::stringstream& input)
     : m_source {input}
 {}
 
-uint8_t Parser::advance() {
-    return m_source.at(pos++);
-}
-
-uint8_t Parser::peek() {
-    return m_source.at(peekPos++);
-}
-
-std::string_view Parser::peek_two() {
-    std::string_view sv {m_source.substr(peekPos, 2)};
-    peekPos += 1;
-    return sv;
-}
-
-bool Parser::is_at_end() {
-    return pos >= m_source.size();
-}
-
-std::optional<std::pair<Parser::FieldType, std::string_view>> Parser::extract_field(uint8_t c) {
-    peekPos = pos;
-    if (!is_at_end() && peek() == c) { // TODO:  WHYYYY???
-        while (!is_at_end() && peek() != ' ');
-        std::string_view field_name {m_source.substr(pos-1, peekPos-pos)};
-        if (m_keywords.contains(field_name)) {
-            Parser::FieldType field_type {static_cast<Parser::FieldType>(m_keywords.at(field_name))};
-            while (!is_at_end() && peek() != '\n');
-            std::pair<FieldType, std::string_view> pair {field_type, m_source.substr(pos-1, peekPos-pos)};
-            return pair;
-        }
-    }
-    return {};
-}
-
-std::optional<std::pair<Parser::FieldType, std::string_view>> Parser::extract_content_field(uint8_t c) {
-    peekPos = pos;
-    if (!is_at_end() && peek() == c) {
-        while (!is_at_end() && peek() != ';');
-        std::string_view content_type {m_source.substr(pos-1, peekPos-pos)};
-        if (m_keywords.contains(content_type)) {
-            Parser::FieldType field_type {};
-            if (content_type.contains("plain")) {
-                field_type = CONTENT_PLAIN;
-            } else {
-                field_type = CONTENT_HTML;
+std::map<Parser::FieldType, std::string> Parser::parse_file() {
+    std::map<Parser::FieldType, std::string> map {};
+    bool count_lines {false};
+    bool extract {false};
+    Parser::FieldType content_type_enum {};
+    std::string content {};
+    for (std::string line; std::getline(m_source, line);) {
+        if (line.size() == 0) {
+            continue;
+        } else if (!count_lines) {
+            char c {line.at(0)};
+            switch (c) {
+                case 'F':
+                case 'T':
+                case 'S':
+                case 'D': {
+                    std::stringstream stream {line};
+                    std::string field_name {};
+                    std::getline(stream, field_name, ' ');
+                    if (m_keywords.contains(field_name)) {
+                        map.emplace(static_cast<Parser::FieldType>(m_keywords.at(field_name)), line);
+                    }
+                    break;
+                }
+                case 'C': {
+                    std::stringstream stream {line};
+                    std::string content_type {};
+                    std::getline(stream, content_type, ';');
+                    if (m_keywords.contains(content_type)) {
+                        content_type_enum = static_cast<Parser::FieldType>(m_keywords.at(content_type));
+                        count_lines = true;
+                    }
+                    break;
+                }
             }
-            pos = peekPos;
-            while(peek_two() != "\n\n");
-            pos = peekPos;
-            while(peek_two() != "\n\n");
-            std::string_view content {m_source.substr(pos+1, peekPos-pos-2)};
-            std::pair<FieldType, std::string_view> pair {field_type, content};
-            return pair;
-        }
-    }
-    return {};
-}
-
-std::map<Parser::FieldType, std::string_view> Parser::parse_file() {
-    std::map<Parser::FieldType, std::string_view> map {};
-    while (!is_at_end()) {
-        uint8_t character = advance();
-        std::optional<std::pair<Parser::FieldType, std::string_view>> result {};
-        switch (character) {
-            case 'F':
-                result = extract_field('r');
-                break;
-            case 'T':
-                result = extract_field('o');
-                break;
-            case 'S':
-                result = extract_field('u');
-                break;
-            case 'D':
-                result = extract_field('a');
-                break;
-            case 'C':
-                result = extract_content_field('o');
-                break;
-        }
-        if (result.has_value()) {
-            map.emplace(result.value());
+        } else {
+            if (line.starts_with("Content-") && !extract) {
+                extract = true;
+                continue;
+            } else if (!line.starts_with("--") && !line.ends_with("--")) {
+                content.append(line + '\n');
+            } else {
+                count_lines = false;
+                extract = false;
+                map.emplace(content_type_enum, content);
+                content = "";
+            }
         }
     }
     return map;
