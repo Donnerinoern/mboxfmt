@@ -10,7 +10,7 @@
 class Generator {
     public:
         enum Mode {
-            PLAIN,
+            TXT,
             HTML,
             MD
         };
@@ -18,13 +18,13 @@ class Generator {
         Generator(std::map<Parser::FieldType, std::string>, std::optional<std::string_view>, Mode);
         void generate_file();
         inline static const std::map<std::string_view, Mode> modes {
-            {"plain", PLAIN},
+            {"txt", TXT},
             {"html", HTML},
             {"md", MD}
         };
 
     private:
-        void generate_plain();
+        void generate_txt();
         void generate_html();
         void generate_md();
         std::string format_filename(const std::string&);

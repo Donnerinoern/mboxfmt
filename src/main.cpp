@@ -30,7 +30,7 @@ void help() {
     std::cout << "  --mode MODE        -m MODE\n";
     std::cout << "  --output FILENAME  -o FILENAME\n\n";
     std::cout << "Modes:\n";
-    std::cout << "  plain\n";
+    std::cout << "  txt\n";
     std::cout << "  html\n";
     std::cout << "  md\n";
 }
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string_view valid_modes{"plain html md"};
+    std::string_view valid_modes{"txt html md"};
     std::vector<std::string_view> args {argv + 1, argv + argc};
     std::string_view mode {};
     std::optional<std::string_view> output_name {};

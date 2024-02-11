@@ -16,8 +16,8 @@ Generator::Generator(std::map<Parser::FieldType, std::string> map, std::optional
 
 void Generator::generate_file() {
     switch (m_mode) {
-        case PLAIN:
-            generate_plain();
+        case TXT:
+            generate_txt();
             break;
         case HTML:
             generate_html();
@@ -28,7 +28,7 @@ void Generator::generate_file() {
     }
 }
 
-void Generator::generate_plain() {
+void Generator::generate_txt() {
     std::string filename {format_filename(".txt")};
     std::fstream file_stream {filename, std::ios::out};
     file_stream << m_map.at(Parser::FROM) << '\n';
