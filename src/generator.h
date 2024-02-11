@@ -2,6 +2,7 @@
 #define GENERATOR_H
 
 #include <map>
+#include <optional>
 #include <string>
 #include <string_view>
 #include "parser.h"
@@ -14,17 +15,18 @@ class Generator {
             MD
         };
 
-        Generator(std::map<Parser::FieldType, std::string_view>);
-        void generate(Mode mode);
-        static Mode get_mode(std::string_view mode);
+        Generator(std::map<Parser::FieldType, std::string_view>, std::optional<std::string_view>);
+        void generate(Mode);
+        static Mode get_mode(std::string_view);
 
     private:
         void generate_plain();
         void generate_html();
         void generate_md();
-        std::string format_filename(const std::string& file_ext);
+        std::string format_filename(const std::string&);
 
         std::map<Parser::FieldType, std::string_view> m_map;
+        std::optional<std::string_view> m_output_name;
         inline static const std::map<std::string_view, Mode> s_modes {
             {"plain", PLAIN},
             {"html", HTML},

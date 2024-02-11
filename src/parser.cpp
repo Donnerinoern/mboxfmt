@@ -4,8 +4,6 @@
 #include <map>
 #include <optional>
 #include <string_view>
-#include <utility>
-#include <vector>
 
 Parser::Parser(std::string_view input)
     : m_source {input}

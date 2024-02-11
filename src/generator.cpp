@@ -2,12 +2,14 @@
 #include <cstddef>
 #include <fstream>
 #include <map>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <iostream>
 
-Generator::Generator(std::map<Parser::FieldType, std::string_view> map)
+Generator::Generator(std::map<Parser::FieldType, std::string_view> map, std::optional<std::string_view> output_name)
     : m_map {map}
+    , m_output_name {output_name}
 {}
 
 void Generator::generate(Mode mode) {
@@ -68,7 +70,13 @@ void Generator::generate_md() {
 }
 
 std::string Generator::format_filename(const std::string& file_ext) {
-    std::string filename {m_map.at(Parser::SUBJECT)};
+    std::string filename {};
+    if (m_output_name.has_value()) {
+        filename = m_output_name.value();
+        filename += file_ext;
+        return filename;
+    }
+    filename = m_map.at(Parser::SUBJECT);
     size_t space_pos {};
     for (size_t i {0}; i < filename.size(); i++) {
         if (filename.at(i) == ':') {
@@ -79,6 +87,6 @@ std::string Generator::format_filename(const std::string& file_ext) {
     return filename;
 }
 
-Generator::Mode Generator::get_mode(std::string_view mode) {
+Generator::Mode Generator::get_mode(const std::string_view mode) {
     return s_modes.at(mode);
 }
