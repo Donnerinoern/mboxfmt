@@ -15,7 +15,7 @@ class Generator {
             MD
         };
 
-        Generator(std::map<Parser::FieldType, std::string>, std::optional<std::string_view>, Mode);
+        Generator(std::map<Parser::FieldType, std::string>, std::string, Mode);
         void generate_file();
         inline static const std::map<std::string_view, Mode> modes {
             {"txt", TXT},
@@ -27,10 +27,9 @@ class Generator {
         void generate_txt();
         void generate_html();
         void generate_md();
-        std::string format_filename(const std::string&);
 
         std::map<Parser::FieldType, std::string> m_map;
-        std::optional<std::string_view> m_output_name;
+        std::string m_output_name;
         Mode m_mode;
 };
 

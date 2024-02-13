@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -24,49 +25,57 @@ bool file_valid(std::ifstream& file_stream) {
 }
 
 void help() {
-    std::cout << "Usage: mboxtomd [arg [...]] <filename>\n\n";
+    std::cout << "Usage: mboxto [arg [...]] <input> <output>\n\n";
     std::cout << "Arguments:\n";
-    std::cout << "  --help             -h\n";
-    std::cout << "  --mode MODE        -m MODE\n";
-    std::cout << "  --output FILENAME  -o FILENAME\n\n";
-    std::cout << "Modes:\n";
+    std::cout << "  --help                   -h\n";
+    std::cout << "  --force FILE_EXT         -f FILE_EXT\n\n";
+    std::cout << "Valid file extensions:\n";
     std::cout << "  txt\n";
     std::cout << "  html\n";
     std::cout << "  md\n";
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
+    if (argc < 3) {
         help();
         return 1;
     }
 
-    std::string_view valid_modes{"txt html md"};
-    std::vector<std::string_view> args {argv + 1, argv + argc};
-    std::string_view mode {};
-    std::optional<std::string_view> output_name {};
+    bool force {false};
+    std::vector<std::string> args {argv + 1, argv + argc};
+    std::string input_filename {};
+    std::string output_filename {};
+    std::string_view file_ext {};
     for (auto it {args.begin()}; it != args.end(); it++) {
-        if (it->compare("-m") == 0 || it->compare("--mode") == 0) {
-            if (!valid_modes.contains(*std::next(it)) || std::next(it) == args.end()) {
-                std::cout << "Enter a mode.\n";
-                return 1;
-            } else {
-                mode = *std::next(it);
-            }
-        } else if (it->compare("-o") == 0 || it->compare("--output") == 0) {
-            if (std::next(it) != args.end()) {
-                output_name = *std::next(it);
-            } else {
-                std::cout << "Missing output filename.\n";
-            }
-        } else if (it->compare("-h") == 0 || it->compare("--help") == 0) {
+        if (it->compare("-h") == 0 || it->compare("--help") == 0) {
             help();
             return 0;
+        } else if (it->compare("-f") == 0 || it->compare("--force") == 0) {
+            if (std::next(it) == args.end()) {
+                help();
+                return 1;
+            } else {
+                force = true;
+                file_ext = *std::next(it);
+            }
+        } else if (std::next(it) == args.end()) {
+            input_filename = *std::prev(it);
+            output_filename = *it;
         }
     }
 
-    std::string filename {args.back()};
-    std::ifstream file_stream (filename);
+    if (output_filename.contains(".") && !force) {
+        file_ext = output_filename.substr(output_filename.find_last_of(".")+1, output_filename.size()-1);
+    } else if (!force) {
+        std::cout << "Output filename is not valid.\n";
+        return 1;
+    }
+
+    if (!std::filesystem::is_regular_file(input_filename)) {
+        std::cout << "File is not regular file.\n";
+    }
+
+    std::ifstream file_stream {input_filename};
     if (!file_valid(file_stream)) {
         return 1;
     }
@@ -77,6 +86,6 @@ int main(int argc, char* argv[]) {
     Parser parser {string_stream};
     std::map<Parser::FieldType, std::string> map {parser.parse_file()};
 
-    Generator generator {map, output_name, Generator::modes.at(mode)};
+    Generator generator {map, output_filename, Generator::modes.at(file_ext)};
     generator.generate_file();
 }

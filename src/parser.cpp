@@ -16,50 +16,50 @@ Parser::Parser(std::stringstream& input)
 
 std::map<Parser::FieldType, std::string> Parser::parse_file() {
     std::map<Parser::FieldType, std::string> map {};
-    bool count_lines {false};
+    std::string buffer {};
     bool extract {false};
-    Parser::FieldType content_type_enum {};
-    std::string content {};
+    Parser::FieldType active_extract {};
     for (std::string line; std::getline(m_source, line);) {
-        if (line.size() == 0) {
+        if (line.size() <= 0) {
             continue;
-        } else if (!count_lines) {
-            char c {line.at(0)};
-            switch (c) {
-                case 'F':
-                case 'T':
-                case 'S':
-                case 'D': {
-                    std::stringstream stream {line};
-                    std::string field_name {};
-                    std::getline(stream, field_name, ' ');
-                    if (m_keywords.contains(field_name)) {
-                        map.emplace(static_cast<Parser::FieldType>(m_keywords.at(field_name)), line);
-                    }
-                    break;
-                }
-                case 'C': {
-                    std::stringstream stream {line};
-                    std::string content_type {};
-                    std::getline(stream, content_type, ';');
-                    if (m_keywords.contains(content_type)) {
-                        content_type_enum = static_cast<Parser::FieldType>(m_keywords.at(content_type));
-                        count_lines = true;
-                    }
-                    break;
-                }
+        }
+
+        if (extract) {
+            if (!(line.at(0) == ' ') && active_extract == SUBJECT) {
+                map.emplace(active_extract, "Subject:" + buffer);
+                buffer.clear();
+                extract = false;
+            } else if (line.starts_with("--_")) {
+                map.emplace(active_extract, buffer);
+                buffer.clear();
+                extract = false;
+            } else if (line.starts_with("Content-Transfer-Encoding:")) {
+                continue;
+            } else {
+                buffer.append("\n" + line);
             }
         } else {
-            if (line.starts_with("Content-") && !extract) {
-                extract = true;
-                continue;
-            } else if (!line.starts_with("--") && !line.ends_with("--")) {
-                content.append(line + '\n');
-            } else {
-                count_lines = false;
-                extract = false;
-                map.emplace(content_type_enum, content);
-                content = "";
+            if (line.starts_with("To: ")) {
+                map.emplace(TO, line);
+            } else if (line.starts_with("From: ")) {
+                map.emplace(FROM, line);
+            } else if (line.starts_with("Date: ")) {
+                map.emplace(DATE, line);
+            } else if (line.starts_with("Subject:")) {
+                if (line.size() <= 8) {
+                    active_extract = SUBJECT;
+                    extract = true;
+                } else {
+                    map.emplace(SUBJECT, line);
+                }
+            } else if (line.starts_with("Content-Type: ")) {
+                if (line.contains("text/plain")) {
+                    active_extract = CONTENT_PLAIN;
+                    extract = true;
+                } else if (line.contains("text/html")) {
+                    active_extract = CONTENT_HTML;
+                    extract = true;
+                }
             }
         }
     }
