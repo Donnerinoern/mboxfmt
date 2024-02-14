@@ -29,7 +29,7 @@ std::map<Parser::FieldType, std::string> Parser::parse_file() {
                 map.emplace(active_extract, "Subject:" + buffer);
                 buffer.clear();
                 extract = false;
-            } else if (line.starts_with("--_")) {
+            } else if (line.starts_with("--")) {
                 map.emplace(active_extract, buffer);
                 buffer.clear();
                 extract = false;

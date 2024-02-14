@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    bool force {false};
+    bool force {false}; // TODO: Fix
     std::vector<std::string> args {argv + 1, argv + argc};
     std::string input_filename {};
     std::string output_filename {};
