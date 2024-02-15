@@ -58,7 +58,7 @@ void Generator::generate_md() {
     file_stream << m_map.at(Parser::DATE) << "\n\n";
     file_stream << m_map.at(Parser::SUBJECT) << "\n\n";
     file_stream << "---\n\n";
-    file_stream << "#### " << m_map.at(Parser::SUBJECT).substr(8) << "\n\n";
+    file_stream << "####" << m_map.at(Parser::SUBJECT).substr(8) << "\n\n";
     std::string content {m_map.at(Parser::CONTENT_PLAIN)};
     for (size_t i{0}; i < content.size(); i++) {
         if (content.at(i) == '\n') {

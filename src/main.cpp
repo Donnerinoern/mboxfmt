@@ -10,6 +10,7 @@
 #include <vector>
 #include "generator.h"
 #include "parser.h"
+#include "formatter.h"
 
 bool file_valid(std::ifstream& file_stream) {
     if (!file_stream.good()) {
@@ -83,9 +84,14 @@ int main(int argc, char* argv[]) {
     string_stream << file_stream.rdbuf();
     file_stream.close();
 
+    Generator::Mode mode {Generator::modes.at(file_ext)};
+
     Parser parser {string_stream};
     std::map<Parser::FieldType, std::string> map {parser.parse_file()};
 
-    Generator generator {map, output_filename, Generator::modes.at(file_ext)};
+    Formatter formatter {map, mode};
+    formatter.format();
+
+    Generator generator {map, output_filename, mode};
     generator.generate_file();
 }
